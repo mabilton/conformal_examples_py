@@ -161,8 +161,9 @@ def __(alt, np, pd, theoretical_finite_sample_coverage_pdf):
             tooltip=[alt.Tooltip('k:Q', title='Number of Samples'), alt.Tooltip('Probability:Q', title='Probability Mass')]
         ).properties(
             title=[
-                f'Empirical Coverage Distribution for {calib_size:,} Calibration ',
-                f'Points and {valid_size:,} Validation Points'
+                f'Theoretical Coverage Distribution for α = {alpha:.1%}, ',
+                f'{calib_size:,} Calibration Points, and '
+                f'{valid_size:,} Validation Points'
             ],
         )
         return chart
@@ -179,12 +180,13 @@ def __(alt, np, pd, theoretical_infinite_sample_coverage_pdf):
             'pdf': pdf_values
         }) 
         chart = alt.Chart(df).mark_line().encode(
-            x=alt.X('covered_frac:Q', title='Empirical Coverage Fraction'),
+            x=alt.X('covered_frac:Q', title='Coverage', axis=alt.Axis(format=".0%")),
             y=alt.Y('pdf:Q', title='Probability Density'),
         ).properties(
             title=[
-                f'Empirical Coverage Distribution for {calib_size:,} Calibration ',
-                'Points and Infinitely Many Validation Points'
+                f'Theoretical Coverage Distribution for α = {alpha:.1%}, ',
+                f'{calib_size:,} Calibration Points, and '
+                'Infinitely Many Validation Points'
             ]
         )
         return chart
@@ -193,30 +195,88 @@ def __(alt, np, pd, theoretical_infinite_sample_coverage_pdf):
 
 @app.cell
 def __():
-    alpha_plot = 0.1
-    calib_size_plot = 50
-    valid_size_plot = 50
-    return alpha_plot, calib_size_plot, valid_size_plot
+    plot_params_1 = {
+        'alpha': 0.1,
+        'calib_size': 50,
+        'valid_size': 50
+    }
+    return (plot_params_1,)
 
 
 @app.cell(hide_code=True)
 def __(
-    alpha_plot,
-    calib_size_plot,
+    plot_params_1,
     plot_theoretical_finite_sample_coverage_pdf,
     plot_theoretical_infinite_sample_coverage_pdf,
-    valid_size_plot,
 ):
-    (
-        plot_theoretical_finite_sample_coverage_pdf(
-            alpha=alpha_plot, 
-            calib_size=calib_size_plot, 
-            valid_size=valid_size_plot
-        ) |
-        plot_theoretical_infinite_sample_coverage_pdf(
-            alpha=alpha_plot, 
-            calib_size=calib_size_plot
+    plot_theoretical_finite_sample_coverage_pdf(
+        alpha=plot_params_1['alpha'], 
+        calib_size=plot_params_1['calib_size'], 
+        valid_size=plot_params_1['valid_size']
+    ) | \
+    plot_theoretical_infinite_sample_coverage_pdf(
+        alpha=plot_params_1['alpha'], 
+        calib_size=plot_params_1['calib_size']
+    )
+    return
+
+
+@app.cell
+def __():
+    plot_params_2 = {
+        'alpha': 0.1,
+        'calib_sizes': [10, 100, 1_000, 10_000],
+    }
+    return (plot_params_2,)
+
+
+@app.cell(hide_code=True)
+def __(alt, np, pd, theoretical_infinite_sample_coverage_pdf):
+    def plot_theoretical_infinite_sample_coverage_pdf_by_calib_size(alpha: float, calib_sizes: list[int], xlims: tuple[float, float] | None = None, npoints: int = 1_000) -> alt.Chart:
+        if xlims is None:
+            covered_frac = np.linspace(0, 1, npoints)
+        else:
+            covered_frac = np.linspace(xlims[0], xlims[1], npoints)
+        
+        dfs: list[pd.DataFrame] = []
+        for calib_size in calib_sizes:
+            pdf_values = theoretical_infinite_sample_coverage_pdf(covered_frac, alpha=alpha, calib_size=calib_size)    
+            df = pd.DataFrame({
+                'covered_frac': covered_frac,
+                'pdf': pdf_values,
+                'calib_size': calib_size
+            }) 
+            dfs.append(df)
+        df = pd.concat(dfs)
+        chart = alt.Chart(df).mark_line().encode(
+            x=alt.X('covered_frac:Q', title='Coverage', axis=alt.Axis(format=".0%")),
+            y=alt.Y('pdf:Q', title='Probability Density'),
+            color=alt.Color('calib_size:N', legend=alt.Legend(title="Calibration Size", format=',')) 
+        ).properties(
+            title=[
+                f'Theoretical Coverage Distribution for α = {alpha:.1%} ',
+                'and Infinitely Many Validation Points'
+            ]
         )
+
+        vline = 1
+        
+        return chart
+    return (plot_theoretical_infinite_sample_coverage_pdf_by_calib_size,)
+
+
+@app.cell(hide_code=True)
+def __(
+    plot_params_2,
+    plot_theoretical_infinite_sample_coverage_pdf_by_calib_size,
+):
+    plot_theoretical_infinite_sample_coverage_pdf_by_calib_size(
+        alpha=plot_params_2['alpha'], 
+        calib_sizes=plot_params_2['calib_sizes'],
+        xlims=(0.8, 1)
+    ).properties(
+        width=400,
+        height=300
     )
     return
 
@@ -255,7 +315,7 @@ def __(Pipeline, np):
         model: Pipeline,
         X_calib: np.ndarray,
         y_calib: np.ndarray,
-        alpha: np.ndarray | float
+        alpha: float
     ) -> np.ndarray:
 
         # Compute non-conformity scores on calibration dataset:
