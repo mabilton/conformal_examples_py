@@ -4,6 +4,12 @@ __generated_with = "0.9.16"
 app = marimo.App(width="medium")
 
 
+@app.cell(hide_code=True)
+def __(mo):
+    mo.md(r"""# Applying Split Conformal Prediction to Text Classification""")
+    return
+
+
 @app.cell
 def __():
     from pathlib import Path
@@ -50,9 +56,9 @@ def __():
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(r"""## News Category Dataset""")
+    mo.md(r"""## Loading and Inspecting the News Category Dataset""")
     return
 
 
@@ -63,7 +69,11 @@ def __(Path, mo, pd, requests):
     ) -> pd.DataFrame:
 
         if (categories is not None) and (num_categories is not None):
-            raise ValueError('TODO')
+            raise ValueError(
+                "Both 'categories' and 'num_categories' were provided, "
+                "but only one should be specified. Please provide either "
+                "'categories' or 'num_categories', but not both."
+            )
 
         json_path = download_news_classification_dataset(save_dir=save_dir)
         df = pd.read_json(json_path, lines=True)
@@ -282,7 +292,7 @@ def __(df_train, preview_news_dataset_label_distribution):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(r"""## Training a Simple Text Classification Model""")
     return
@@ -429,12 +439,6 @@ def __(
         y_test=df_test['y'],
         rng=rng_optimize
     )
-    # best_params = {
-    #     'n_features': 6175,
-    #     'n_estimators': 104,
-    #     'min_samples_split': 6,
-    #     'min_samples_leaf': 3
-    # }
     return best_params, rng_optimize
 
 
@@ -593,7 +597,7 @@ def __(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(r"""## Sampling from the Empirical Coverage Distribution""")
     return
@@ -879,7 +883,7 @@ def __(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(r"""## Class-Conditional Coverage""")
     return
@@ -1014,8 +1018,10 @@ def __(Any, alt, chain, np, pd):
     ) -> alt.Chart:
 
         if (uncond_quantity is None) and (cond_quantity is None):
-            raise ValueError('TODO')
-
+            raise ValueError(
+                "Both 'uncond_quantity' and 'cond_quantity' are missing. "
+                "Please specify at least one of these quantities to proceed."
+            )
         two_bar_sets = (uncond_quantity is not None) and (cond_quantity is not None)
 
         if two_bar_sets:
@@ -1265,9 +1271,10 @@ def __(
         quantity_format_str='.2%',
         bar_text_ypadding=0.005
     ).properties(
-        title=(
-            'TODO'
-        ),
+        title=[
+            'Logit Thresholds for Class Unconditional',
+            'vs Class Conditional Split Conformal Prediction'
+        ],
         height=400,
         width=800
     )
@@ -1330,12 +1337,18 @@ def __(
         quantity_name='Average Set Size over Validation Dataset',
         bar_text_ypadding=0.3
     ).properties(
-        title=(
-            'TODO'
-        ),
+        title=[
+            'Average Prediction Set Sizes for Class Unconditional',
+            'vs Class Conditional Split Conformal Prediction'
+        ],
         height=400,
         width=800
     )
+    return
+
+
+@app.cell
+def __():
     return
 
 

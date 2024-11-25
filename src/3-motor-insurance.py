@@ -4,6 +4,12 @@ __generated_with = "0.9.16"
 app = marimo.App(width="medium")
 
 
+@app.cell(hide_code=True)
+def __(mo):
+    mo.md(r"""# Applying Split Conformal Prediction to a Motor Insurance Regression Problem""")
+    return
+
+
 @app.cell
 def __():
     import marimo as mo
@@ -60,9 +66,9 @@ def __():
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(r"""## The `freMTPL2` Dataset""")
+    mo.md(r"""## Loading and Inspecting the `freMTPL2` Dataset""")
     return
 
 
@@ -275,6 +281,12 @@ def __(data, plot_fremtpl2_freq_dist, plot_fremtpl2_sev_data):
     return
 
 
+@app.cell(hide_code=True)
+def __(mo):
+    mo.md(r"""## Data Splits""")
+    return
+
+
 @app.cell
 def __(np, pd, train_test_split):
     def train_test_calib_valid_split(
@@ -368,7 +380,7 @@ def __(
     return df_calib, df_test, df_train, df_valid
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(r"""## Training Simple GBM-Based Frequency and Severity Models""")
     return
@@ -456,7 +468,8 @@ def __(
         verbose: bool = False
     ):  
         """
-        https://forecastegy.com/posts/catboost-hyperparameter-tuning-guide-with-optuna/
+        Takes heavy inspiration from:
+            https://forecastegy.com/posts/catboost-hyperparameter-tuning-guide-with-optuna/
         """
         def objective_fn(trial: optuna.Trial) -> float:
             gbm_params = {
@@ -770,9 +783,9 @@ def __(df_train_claims, df_valid_claims, sev_train_pred, sev_valid_pred):
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(r"""## Conformal Calibration""")
+    mo.md(r"""## Conformal Calibration of Frequency and Severity Models""")
     return
 
 
@@ -1094,6 +1107,12 @@ def __(df_calib_claims, df_valid_claims, sev_coverage_valid):
         "coverage on validation dataset "
         f"({len(df_calib_claims):,} calibration samples)"
     )
+    return
+
+
+@app.cell(hide_code=True)
+def __(mo):
+    mo.md(r"""## Conformal Calibration of Individual Risk Loss Model""")
     return
 
 

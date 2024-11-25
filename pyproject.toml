@@ -1,7 +1,7 @@
 [project]
 name = "conformal-examples-py"
 version = "0.1.0"
-description = "Add your description here"
+description = ""
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -10,6 +10,7 @@ dependencies = [
     "numpy>=2.1.3",
     "optuna>=4.0.0",
     "pandas>=2.2.3",
+    "requests>=2.32.3",
     "scikit-learn>=1.5.2",
     "scipy>=1.14.1",
     "vegafusion[embed]>=1.6.9",

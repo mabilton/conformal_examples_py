@@ -4,79 +4,72 @@ __generated_with = "0.9.16"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(
         r"""
         # Introduction to Split Conformal Prediction
 
-        This notebook.
+        This notebook offers a concise introduction to the fundamentals of split conformal prediction. Specifically, it covers:
+
+        - What split conformal prediction is.
+        - How to implement it "from scratch" in Python.
+        - A numerical verification of the key properties of split conformal prediction.
+
+        This notebook does not, however, provide any formal mathematical arguments as to 'why' conformal prediction works. For readers that are interested in these details, we recommend referring to the following materials:
+
+        - [*Exchangeability, Conformal Prediction, and Rank Tests*. Arun Kumar Kuchibhotla (2021)](https://arxiv.org/abs/2005.06095).
+        - [*Theoretical Foundations of Conformal Prediction*. Anastasios N. Angelopoulos, Rina Foygel Barber, and Stephen Bates (2024)](https://arxiv.org/abs/2411.11824).
+        - [Ryan Tibshirani's lecture notes](https://www.stat.berkeley.edu/~ryantibs/statlearn-s23/lectures/conformal.pdf).
         """
     )
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(
         r"""
-        ## What is Split Conformal Prediction?
+        ## What is Conformal Prediction?
 
-        *Conformal Prediction* is a
+        *Conformal Prediction* refers to a collection of closely related uncertainty quantification (UQ) methods that 'wraps around' a trained prediction model and produce *well-calibrated prediction intervals* at a user-defined probability level.
+
+        Unlike traditional Frequentist UQ techniques (e.g. bootstrapping, Fisher Information Matrices) or Bayesian UQ techniques (i.e. posterior predictive distributions), conformal prediction still produces 'correct' prediction intervals even when:
+
+        - Your model is misspecified (i.e. your model cannot perfectly describe the data generating process)
+        - Very few samples were used to train your model.
+        - Your prior is misspecified (e.g. your prior ascribes zero probability mass to the 'true' parameter value). This point is only relevant when adopting a Bayesian predictive model.
+
+        Moreover, conformal prediction does *not* require the adoption of any specialized software; indeed, it's relatively trivial to 'retrofit' conformal prediction to previously written modelling code, as we'll see in this notebook.
         """
     )
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
     mo.md(
         r"""
-        ## What is Meant by 'Guaranteed Coverage'?
 
-        Conformal Prediction promises '' ; but what does this promise actually mean?
+        The primary limitation of 'vanilla' conformal prediction is that it assumes that your data is [*exchangeable*](https://en.wikipedia.org/wiki/Exchangeable_random_variables). Simplistically, this means that the probability of observing one's data would not be affected by 'scrambling' the order of observations.
 
+        Exchangeability is actually a *weaker condition* than the independent and identically distributed (IID) assumption in the sense that: 
 
+        - IID random variables are also exchangeable.
+        - Exchangeable random variables are *not necessarily* IID.
 
-        A naive interpretation of this claim is something along the lines of "Conformal Prediction will". Unfortunately, this interpretation is *completely wrong*.
+        A common type of dataset that is *not* exchangeable is time series data, where the order of one's observations clearly matters. That said, significant progress has been made in extending conformal prediction methods to handle non-exchangeable datasets, including time series. For those interested readers, we recommend referring to:
 
-        There are two caveats:
-
-        1. TODO.
-        2. The guaranteed covarge is over *all possible*, meaning that the coverage
+        - [*Conformal Prediction under Covariate Shift*. Ryan J. Tibshirani et al. (2019)](https://arxiv.org/abs/1904.06019)
+        - [*Adaptive Conformal Predictions for Time Series*. Margaux Zaffran et al. (2022)](https://arxiv.org/abs/2202.07282).
         """
     )
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(
-        r"""
-        ### Calibration Set Variability
-
-        It's entirely possible that purely by chance that we sample a calibration set that our model does particularly well at predicting relative to the population distribution, meaning we will 'underestimate' the true distribution of the non-conformity scores.
-        """
-    )
-    return
-
-
-@app.cell
-def __(mo):
-    mo.md(
-        r"""
-        ### Marginal vs Conditional Coverage
-
-
-        $$
-        P(y_{n+1} \in C_\alpha) = \mathbb{E}_{(x, y) \sim p(x,y)} \big[ \mathbb{1}(y) \big]
-        $$
-
-        $$
-        1-\alpha \leq P(y_{n+1} \in C) \leq 1-\alpha+\frac{1}{n_{\text{calib}}+1}
-        $$
-        """
-    )
+    mo.md(r"""## Theoretical Coverage Distribution for Split Conformal Prediction""")
     return
 
 
@@ -237,7 +230,7 @@ def __(alt, np, pd, theoretical_infinite_sample_coverage_pdf):
             covered_frac = np.linspace(0, 1, npoints)
         else:
             covered_frac = np.linspace(xlims[0], xlims[1], npoints)
-        
+
         dfs: list[pd.DataFrame] = []
         for calib_size in calib_sizes:
             pdf_values = theoretical_infinite_sample_coverage_pdf(covered_frac, alpha=alpha, calib_size=calib_size)    
@@ -260,7 +253,7 @@ def __(alt, np, pd, theoretical_infinite_sample_coverage_pdf):
         )
 
         vline = 1
-        
+
         return chart
     return (plot_theoretical_infinite_sample_coverage_pdf_by_calib_size,)
 
@@ -281,9 +274,9 @@ def __(
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(r"""## Putting it into Practice""")
+    mo.md(r"""## Implementing Split Conformal Prediction 'From Scratch'""")
     return
 
 
@@ -624,9 +617,9 @@ def __(
     return X_plot_1, num_covered_1, plot_1a, plot_1b, vertline_1
 
 
-@app.cell
+@app.cell(hide_code=True)
 def __(mo):
-    mo.md(r"""Experiment""")
+    mo.md(r"""## Numerical Validation of Split Conformal Prediction""")
     return
 
 
